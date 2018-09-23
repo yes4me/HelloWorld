@@ -1,0 +1,184 @@
+Rasberry Pi
+	user: root/t*******
+	user: pi/t*******
+Jenkins:
+	user: yes4me/a******t
+
+============================================================
+FIRST TIME SETUP: for kernel Software: Debian/Raspbian
+============================================================
+
+Access command as superuser:
+	cmd: sudo su
+
+Update the resolution
+	cmd: raspi-config
+		> Advanced option > resolution
+	cmd: reboot
+
+The userspace and kernel software must be maintained
+	cmd: sudo apt-get update
+	cmd: sudo apt-get upgrade
+	cmd: apt autoremove
+update raspi-config, date and time:
+	cmd: raspi-config
+		> select option 8: Update
+		> select option 4: localisation options
+		> select option 2: Change timezone > America > Los Angeles
+		press esc
+	cmd: timedatectl
+
+============================================================
+FIRST TIME SETUP: Change default password for root and pi
+============================================================
+
+By default:
+	Login: pi
+	password: raspberry
+To change password:
+	cmd: sudo passwd root
+	cmd: sudo passwd pi
+
+============================================================
+FIRST TIME SETUP: "Update" .bash_profile
+============================================================
+
+cmd: nano ~/.bashrc
+	Add line: . ~/.bash_profile
+	copy .bash_profile to: /home/pi
+cmd: sudo su
+cmd: cd ~
+cmd: cp /home/pi/.bash_profile .
+cmd: nano ~/.bashrc
+	Add line: . ~/.bash_profile
+
+============================================================
+FIRST TIME SETUP: Edit the application launcher
+https://raspberrypi.stackexchange.com/questions/60577/how-can-i-add-custom-application-launchers-to-the-panel/63969
+============================================================
+
+cmd: sudo nano /home/pi/.config/lxpanel/LXDE-pi/panels/panel
+    Button {
+      id=geany.desktop
+    }
+
+------------------------------------------------------------
+Check CPU temperature
+------------------------------------------------------------
+
+cmd: /opt/vc/bin/vcgencmd measure_temp
+- OR -
+cmd: python cputemperature.py
+
+------------------------------------------------------------
+SOFTWARE: ZIP/UNZIP
+PS: To uninstall - cmd: sudo apt-get --purge autoremove zip unzip
+------------------------------------------------------------
+
+cmd: sudo apt-get install zip unzip
+	=> Required to compress
+
+------------------------------------------------------------
+SOFTWARE: Updating Python (pip freeze fail if not in superuser)
+------------------------------------------------------------
+
+Install Python 3 (should be install by default):
+	apt-get install python3
+Update all Python module for python2 and python 3:
+	pip freeze | xargs pip install --upgrade
+	pip3 freeze | xargs pip3 install --upgrade
+
+------------------------------------------------------------
+SOFTWARE: Connect Windows terminal(Putty cmd) to Rasberry Pi (SSH)
+------------------------------------------------------------
+
+cmd: sudo raspi-config
+		> Navigate to Interfacing Options > SSH > Yes
+cmd: hostname  -I
+
+On Windows:
+	1. start Putty
+	2. For hostname enter the IP address of the Rasberry, and select SSH
+	3. Click Open and accept/yes
+
+------------------------------------------------------------
+SOFTWARE: Connect ANDROID PHONE To Raspberry Pi
+PS: do NOT install tightvncserver => cause login issues => allow only root to login
+------------------------------------------------------------
+
+Enable VNC Server by doing the following:
+	cmd: sudo raspi-config
+		> Navigate to Interfacing Options > select VNC > Yes
+Go to:
+	Menu > Preferences > Raspberry Pi Configuration > Interfaces > Enable VNC
+Setup VNC:
+	cmd: vncserver -geometry 1024x728 -depth 24
+
+
+Get server IP address either by running:
+	1 command:
+		cmd: ip address show wlan0
+
+		EXAMPLE:
+		3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+		link/ether b8:27:eb:6d:a2:0b brd ff:ff:ff:ff:ff:ff
+		inet 192.168.1.73/24 brd 192.168.1.255 scope global wlan0
+		   valid_lft forever preferred_lft forever
+		inet6 2600:1700:e680:9b90:5a52:7e0e:909b:17f9/64 scope global mngtmpaddr noprefixroute dynamic
+		   valid_lft 1209320sec preferred_lft 1209320sec
+		inet6 fe80::28b9:ec0e:947d:da3d/64 scope link
+		   valid_lft forever preferred_lft forever
+
+		IP ADDRESS: 192.168.1.73/24
+	2. command
+		cmd: hostname -I
+Get server username:
+	cmd: whoami
+
+
+On your phone:
+	download VNC
+	connect to IP ADDRESS
+
+------------------------------------------------------------
+SOFTWARE: Installing Git
+https://howtoraspberrypi.com/private-git-raspberry-gitlab/
+------------------------------------------------------------
+
+Raspberry Pi:
+	cmd: sudo apt install curl openssh-server ca-certificates postfix apt-transport-https
+	cmd: mkdir /home/pi/git/hello_world
+	cmd: cd /home/pi/git/hello_world
+	cmd: git init
+	<add some files>
+	git add .
+	git commit -m "initial commit"
+	cmd: hostname -I => 192.168.1.73 2600:1700:e680:9b90:5a52:7e0e:909b:17f9
+
+Switching to another computer... FTS
+	cmd: git clone pi@192.168.1.73:/home/pi/git/hello_world
+
+------------------------------------------------------------
+SOFTWARE: Installing Gitlab
+https://hackernoon.com/create-your-own-git-server-using-raspberry-pi-and-gitlab-f64475901a66
+------------------------------------------------------------
+
+cmd: curl https://packages.gitlab.com/gpg.key | sudo apt-key add -
+cmd: sudo curl -sS https://packages.gitlab.com/install/repositories/gitlab/raspberry-pi2/script.deb.sh | sudo bash
+cmd: sudo apt-get install gitlab-ce
+cmd: sudo apt-get update
+cmd: sudo apt-get upgrade
+cmd: sudo gitlab-ctl pg-upgrade
+cmd: sudo gitlab-ctl reconfigure
+
+============================================================
+Others: Applications version
+============================================================
+
+List all applications installed:
+	dpkg -l
+Get versions:
+	cmd: git --version
+	cmd: java -version
+	cmd: python --version
+	cmd: /usr/sbin/apache2 -v

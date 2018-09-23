@@ -1,0 +1,304 @@
+------------------------------------------------------------
+SOFTWARE: APACHE2
+https://www.howtoforge.com/tutorial/ubuntu-jenkins-automation-server/
+------------------------------------------------------------
+
+Fix SSL not secured:
+	Install apache2:
+		cmd: sudo apt-get install apache2
+		PS: Default website is located at: /var/www/html
+	Enable the proxy and the proxy_http modules
+		cmd: sudo a2enmod proxy
+		cmd: sudo a2enmod proxy_http
+	Create a new virtual host file for Jenkins in the sites-available directory:
+		cmd: cd /etc/apache2/sites-available/
+		cmd: nano jenkins.conf
+	Paste virtual host configuration below:
+		<Virtualhost *:80>
+			ServerName        jenkins.hakase-labs.io
+			ProxyRequests     Off
+			ProxyPreserveHost On
+			AllowEncodedSlashes NoDecode
+
+			<Proxy http://localhost:8080/*>
+			  Order deny,allow
+			  Allow from all
+			</Proxy>
+
+			ProxyPass         /  http://localhost:8080/ nocanon
+			ProxyPassReverse  /  http://localhost:8080/
+			ProxyPassReverse  /  http://jenkins.hakase-labs.io/
+		</Virtualhost>
+	Activate Jenkins virtual host:
+		cmd: a2ensite jenkins
+		cmd: systemctl restart apache2
+		cmd: systemctl restart jenkins
+	Setup env:
+		Edit file: sudo nano /etc/apache2/envvars
+			From:
+				export APACHE_RUN_USER=www-data
+				export APACHE_RUN_GROUP=www-data
+			To:
+				export APACHE_RUN_USER=pi
+				export APACHE_RUN_GROUP=pi
+
+============================================================
+SOFTWARE: Installing Jenkins
+https://www.techcoil.com/blog/how-i-setup-jenkins-on-my-raspberry-pi-3-with-raspbian-stretch-lite/
+============================================================
+
+cmd: wget -q -O - https://jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
+cmd: sh -c 'echo deb http://pkg.jenkins-ci.org/debian binary/ > /etc/apt/sources.list.d/jenkins.list'
+cmd: apt-get update
+cmd: apt-get install jenkins -y
+cmd: systemctl status jenkins.service
+
+	● jenkins.service - LSB: Start Jenkins at boot time
+	   Loaded: loaded (/etc/init.d/jenkins; generated; vendor preset: enabled)
+	   Active: active (exited) since Mon 2018-09-10 21:49:58 PDT; 23s ago <== JENKINS IS RUNNING
+		 Docs: man:systemd-sysv-generator(8)
+
+	Sep 10 21:49:55 raspberrypi systemd[1]: Starting LSB: Start Jenkins at boot time...
+	Sep 10 21:49:56 raspberrypi jenkins[3505]: Correct java version found
+	Sep 10 21:49:56 raspberrypi su[3535]: Successful su for jenkins by root
+	Sep 10 21:49:56 raspberrypi su[3535]: + ??? root:jenkins
+	Sep 10 21:49:56 raspberrypi su[3535]: pam_unix(su:session): session opened for user jenkins by (uid=0)
+	Sep 10 21:49:58 raspberrypi jenkins[3505]: Starting Jenkins Automation Server: jenkins.
+	Sep 10 21:49:58 raspberrypi systemd[1]: Started LSB: Start Jenkins at boot time.
+
+Browser: http://localhost:8080
+	1. Get password:
+		cmd: cat /var/lib/jenkins/secrets/initialAdminPassword
+			Administrator password: d2cf22c6f68f4d0b8315fd616381d5f9
+		Paste the password to the browser
+	2. Configure Proxy => Back
+	3. Create First Admin User
+		User name:	pi
+		Password:	d2cf22c6f68f4d0b8315fd616381d5f9
+	3. Customize Jenkins => Install suggested plugins
+	Instance Configuration ==> http://localhost:8080/
+
+Problems I encountered:
+	1. "Jenkins is offline"
+		cmd: sudo su
+		cmd: nano /var/lib/jenkins/hudson.model.UpdateCenter.xml
+			Change https -> http
+	2. "Jenkins is error": Overall/Read permission
+		cmd: nano /var/lib/jenkins/config.xml
+		<useSecurity>true</useSecurity> -> <useSecurity>false</useSecurity>
+	3. If I need to start/stop/restart Jenkins
+		sudo service jenkins stop
+		sudo service jenkins start
+		sudo service jenkins restart
+
+------------------------------------------------------------
+Project: HelloWorld
+Copy java file, compile, and run it
+------------------------------------------------------------
+
+cmd: sudo visudo
+	add line: jenkins ALL=NOPASSWD:/home/pi/git
+
+Jenkins:
+	Click on:	"new item"
+
+	Item name:	HelloWorld
+	Click on:	Freestyle project
+	Press OK => create a folder: /var/lib/jenkins/workspace/HelloWorld
+
+	Build/Execute shell:
+		# whoami # => jenkins
+		# pwd # => /var/lib/jenkins/workspace/HelloWorld
+		# WORK ONLY IF THERE ARE FILES (BUT NOT NEEDED): rm *
+		cp /home/pi/git/hello_world/*.java .
+		javac HelloWorld.java
+		java HelloWorld
+
+	Click on:	HOME
+	Click on:	item name: HelloWorld
+	Click on:	Build Now
+	Click on:	Number in "Build History"
+	Click on:	Console Output
+
+------------------------------------------------------------
+Project: HelloWorld_github
+Run the code from github whenever there is an update
+PS: SCM = Source Control Management
+------------------------------------------------------------
+
+cmd: hostname -I
+	=> 192.168.1.73
+Browser: http://localhost:8080/ and http://192.168.1.73:8080/
+	=> should open Jenkins
+
+Jenkins > Manage Jenkins > Configure System
+	Usage Statistics: turn off
+	Jenkins location: http://jenkins.hakase-labs.io
+	GitHub > Advanced...
+		Manage additional GitHub actions > Convert login and password to token
+		From login and password > login and password of githubs
+			> Create token credentials
+		Click "Add GitHub Server" > "GitHub Server"
+		Click "Credentials" > select GitHub
+	Click Apply > Save
+Jenkins/Manage Jenkins/Manage Plugins > Available:
+	- Install: Git
+		--> This also installs:
+			Apache HttpComponents Client 4.x API
+			bouncycastle API
+			Command Agent Launcher
+			Credentials
+			Display URL API
+			Git <== MAIN PLUGIN
+			Git client
+			JDK Tool
+			JSch dependency
+			JUnit
+			Mailer
+			Matrix Project
+			Pipeline: API
+			Pipeline: SCM Step
+			Pipeline: Step API
+			Script Security
+			Structs
+			SCM API
+			SSH Credentials
+		==> add Source Code Management: Git
+	- Install: GitHub
+		--> This also installs:
+			GitHub <== MAIN PLUGIN
+			GitHub API
+			Jackson 2 API
+			Plain Credentials
+			Token Macro
+Jenkins > "new item"
+	Item name:	HelloWorld_git
+	Click on:	Freestyle project
+	Press OK => create a folder: /var/lib/jenkins/workspace/HelloWorld_git
+
+	Source Code Management: Git
+		Repository URL: https://github.com/yes4me/HelloWorld.git
+	Build Triggers:
+		GitHub hook trigger for GITScm polling
+	Build/Execute shell:
+		javac HelloWorld.java
+		java HelloWorld
+
+
+
+
+
+
+
+
+------------------------------------------------------------
+TMP
+------------------------------------------------------------
+
+Browser:
+
+http://192.168.1.73/
+https://192.168.1.73:8080
+http://192.168.1.73:8080/github-webhook/
+https://yes4me:turbonix@192.168.1.73//
+https://github.com/yes4me/HelloWorld/settings/hooks/51113551
+
+
+
+Jenkins > Credentials
+
+
+Jenkins > Manage Jenkins > Manages Nodes
+	Select Master
+	Click on "Script Console"
+
+
+
+Browser: https://github.com/yes4me/HelloWorld/settings/hooks/new
+	Payload URL: http://192.168.1.73:8080/github-webhook/
+	Content type: application/json
+
+	sudo su -s /bin/bash jenkins
+
+------------------------------------------------------------
+Project: HelloWorld_gitlab
+Add Source Code Management: Git and run the code from local gitlab
+------------------------------------------------------------
+
+Install plugin:
+- GitLab
+	--> This also installs:
+	GitLab Plugin <== This plugin
+	Pipeline: Job
+	Pipeline: Supporting APIs
+
+Jenkins (to save the login and password to access git):
+	Credentials > System > Add domain
+	Domain Name: gitlab username and password
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+APACHE
+	Create the certificate:
+		cmd: sudo mkdir /etc/apache2/ssl
+		cmd: sudo openssl req -x509 -nodes -days 1095 -newkey rsa:2048 -out /etc/apache2/ssl/server.crt -keyout /etc/apache2/ssl/server.key
+			Country Name (2 letter code) [AU]:US
+			State or Province Name (full name) [Some-State]:CA
+			Locality Name (eg, city) []:San Diego
+			Organization Name (eg, company) [Internet Widgits Pty Ltd]:yes4me
+			Organizational Unit Name (eg, section) []:.
+			Common Name (e.g. server FQDN or YOUR name) []:yes4me
+			Email Address []:yes4me@hotmail.com
+	Install the SSL mod for Apache2
+		cmd: sudo a2enmod ssl
+	Restart Apache:
+		cmd: sudo service apache2 restart
+	Create a file and symbolic link to the sites-enabled and sites-default folders
+		cmd: sudo ln -s /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-enabled/000-default-ssl.conf
+		cmd: sudo nano /etc/apache2/sites-enabled/000-default-ssl.conf
+			Insert these two lines before </VirtualHost>:
+				SSLCertificateFile    /etc/apache2/ssl/server.crt
+				SSLCertificateKeyFile /etc/apache2/ssl/server.key
+	Check config:
+		cmd: sudo apachectl configtest
+		PROBLEM: AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
+			cmd: echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/servername.conf
+			cmd: sudo a2enconf servername
+			cmd: systemctl reload apache2
+			cmd: sudo service apache2 restart
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------
+Others:
+------------------------------------------------------------
+
+Manage Jenkins > Plugin Manager
+	Password: sudo more /var/log/jenkins/jenkins.log
+	d2cf22c6f68f4d0b8315fd616381d5f9
+
+List users
+	cmd: getent passwd | cut -d':' -f1
+switch user:
+	su <user name>
+Run a command as a root user with root privilege
+	sudo
