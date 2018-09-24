@@ -1,6 +1,0 @@
-total 28
--rw-r--r-- 1 pi pi  268 Sep 22 00:46 cputemperature.py
--rw-r--r-- 1 pi pi  110 Sep 22 00:46 HelloWorld.java
--rw-r--r-- 1 pi pi 9095 Sep 22 00:46 notes_jenkins.txt
--rw-r--r-- 1 pi pi 5896 Sep 23 11:20 notes_raspberry_pi.txt
--rw-r--r-- 1 pi pi    0 Sep 23 23:22 test.txt
