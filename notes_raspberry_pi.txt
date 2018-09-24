@@ -161,6 +161,7 @@ Switching to another computer... FTS
 ------------------------------------------------------------
 SOFTWARE: Installing Gitlab
 https://hackernoon.com/create-your-own-git-server-using-raspberry-pi-and-gitlab-f64475901a66
+PS: DO NOT INSTALL!! IT IS TOO SLOW ON THE RASPBERRY PI
 ------------------------------------------------------------
 
 cmd: curl https://packages.gitlab.com/gpg.key | sudo apt-key add -
