@@ -1,4 +1,12 @@
-SAVE THE LOGIN AND PASSWORD
+============================================================
+MAIN COMMAND
+============================================================
+
+git commit -m "hello" --amend
+
+============================================================
+Configuration: save login and password for 1 hour
+============================================================
 
 # Set git to use the credential memory cache
 cmd: git config --global credential.helper cache
