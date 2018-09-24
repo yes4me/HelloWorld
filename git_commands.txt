@@ -1,0 +1,6 @@
+SAVE THE LOGIN AND PASSWORD
+
+# Set git to use the credential memory cache
+cmd: git config --global credential.helper cache
+# Set the cache to timeout after 1 hour (setting is in seconds
+cmd: git config --global credential.helper 'cache --timeout=3600'
