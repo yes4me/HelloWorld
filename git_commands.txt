@@ -2,6 +2,11 @@
 MAIN COMMAND
 ============================================================
 
+git init
+git init --bare
+	=> For setting up a remote reposity
+	=> you don't work on this = no commit, just pull/push
+
 git commit -m "hello" --amend
 
 ============================================================
