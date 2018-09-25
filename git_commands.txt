@@ -22,7 +22,13 @@ cmd: git config --global credential.helper 'cache --timeout=3600'
 HOOK
 ============================================================
 
-HOOK after each commit:
+git init --bare/after pushing:
+	1. post-receive: as soon as it receives anything
+	2. post-update: as soon as it actually update something
+PS: if you run "ls > test.txt", root is in project, not the .git/hook
+
+
+git init/after each commit:
 	cmd: nano .git/hooks/post-commit
 		#!/bin/bash
 		echo "hello post-commit"
