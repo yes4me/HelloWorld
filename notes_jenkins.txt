@@ -92,6 +92,16 @@ Problems I encountered:
 		sudo service jenkins restart
 
 ------------------------------------------------------------
+Create API Token to avoid typing the username/password
+------------------------------------------------------------
+
+Click on username (top right) > Configure => API Token
+Thomas Nguyen: 11f289e1c8b1a2fcc6de2a7f213b693158
+
+cmd: curl -X POST http://192.168.1.73:8080/job/HelloWorld/build --user yes4me:11f289e1c8b1a2fcc6de2a7f213b693158
+PS: curl -X POST JENKINS_URL/job/JOB_NAME/build --user username:token
+
+------------------------------------------------------------
 Project: HelloWorld
 Copy java file, compile, and run it
 ------------------------------------------------------------
