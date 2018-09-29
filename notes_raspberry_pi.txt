@@ -5,6 +5,23 @@ Jenkins:
 	user: yes4me/a******t
 
 ============================================================
+BACKGROUND
+============================================================
+
+cmd: cat /etc/os-release
+	PRETTY_NAME="Raspbian GNU/Linux 9 (stretch)"
+	NAME="Raspbian GNU/Linux"
+	VERSION_ID="9"
+	VERSION="9 (stretch)"
+	ID=raspbian
+	ID_LIKE=debian
+	HOME_URL="http://www.raspbian.org/"
+	SUPPORT_URL="http://www.raspbian.org/RaspbianForums"
+	BUG_REPORT_URL="http://www.raspbian.org/RaspbianBugs"
+cmd: uname -a
+	Linux raspberrypi 4.14.70-v7+ #1144 SMP Tue Sep 18 17:34:46 BST 2018 armv7l GNU/Linux
+
+============================================================
 FIRST TIME SETUP: for kernel Software: Debian/Raspbian
 ============================================================
 
