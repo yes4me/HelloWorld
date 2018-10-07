@@ -472,6 +472,6 @@ alias wmic="df -h"					#"wmic logicaldisk get size,freespace,caption" = "df -h"
 # Ubuntu only
 # ============================================================================
 
-alias update="sudo apt-get update && sudo apt-get upgrade && sudo apt-get dist-upgrade"
+alias update="sudo apt-get update && sudo apt-get upgrade && sudo apt-get dist-upgrade && sudo apt clean && sudo apt autoremove"
 
 commands
